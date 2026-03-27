@@ -1,0 +1,12 @@
+CREATE TABLE tickets (
+    ticket_id INT PRIMARY KEY,
+    created_date DATE,
+    resolved_date DATE,
+    queue VARCHAR(100),
+    priority VARCHAR(20),
+    type VARCHAR(50),
+    primary_tag VARCHAR(100),
+    secondary_tag VARCHAR(100),
+    category_tag VARCHAR(100),
+    country VARCHAR(100)
+);
