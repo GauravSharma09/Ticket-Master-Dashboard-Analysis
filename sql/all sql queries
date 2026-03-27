@@ -1,0 +1,189 @@
+-- 1. Total Tickets
+SELECT COUNT(*) AS total_tickets FROM tickets;
+
+-- 2. Unique Queues
+SELECT DISTINCT queue FROM tickets;
+
+-- 3. Tickets per Queue
+SELECT queue, COUNT(*) AS total
+FROM tickets
+GROUP BY queue;
+
+-- 4. Tickets by Priority
+SELECT priority, COUNT(*) AS total
+FROM tickets
+GROUP BY priority;
+
+-- 5. Tickets by Type
+SELECT type, COUNT(*) AS total
+FROM tickets
+GROUP BY type;
+
+-- 6. Tickets per Country
+SELECT country, COUNT(*) AS total
+FROM tickets
+GROUP BY country;
+
+-- 7. Average Resolution Time
+SELECT AVG(DATEDIFF(resolved_date, created_date)) AS avg_days
+FROM tickets;
+
+-- 8. Resolution Time by Priority
+SELECT 
+  priority,
+  AVG(DATEDIFF(resolved_date, created_date)) AS avg_days
+FROM tickets
+GROUP BY priority;
+
+-- 9. Monthly Ticket Trend
+SELECT 
+  MONTH(created_date) AS month,
+  COUNT(*) AS total_tickets
+FROM tickets
+GROUP BY month
+ORDER BY month;
+
+-- 10. Queue-wise Workload Percentage
+SELECT 
+  queue,
+  COUNT(*) AS total,
+  ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM tickets), 2) AS percentage
+FROM tickets
+GROUP BY queue
+ORDER BY total DESC;
+
+-- 11. Most Common Primary Tags
+SELECT 
+  primary_tag,
+  COUNT(*) AS total
+FROM tickets
+GROUP BY primary_tag
+ORDER BY total DESC;
+
+-- 12. Ticket Status (Open vs Closed)
+SELECT 
+  CASE 
+    WHEN resolved_date IS NULL THEN 'Open'
+    ELSE 'Closed'
+  END AS status,
+  COUNT(*) AS total
+FROM tickets
+GROUP BY status;
+
+-- 13. SLA Breach (More than 5 days)
+SELECT 
+  ticket_id,
+  queue,
+  priority,
+  DATEDIFF(resolved_date, created_date) AS resolution_days
+FROM tickets
+WHERE DATEDIFF(resolved_date, created_date) > 5;
+
+-- 14. Top 3 Busy Queues
+SELECT queue, COUNT(*) AS total
+FROM tickets
+GROUP BY queue
+ORDER BY total DESC
+LIMIT 3;
+
+-- 15. Priority vs Type Matrix
+SELECT 
+  priority,
+  type,
+  COUNT(*) AS total
+FROM tickets
+GROUP BY priority, type
+ORDER BY priority, total DESC;
+
+-- 16. Avg Resolution Time per Queue
+SELECT 
+  queue,
+  AVG(DATEDIFF(resolved_date, created_date)) AS avg_time
+FROM tickets
+GROUP BY queue
+ORDER BY avg_time DESC;
+
+-- 17. Most Problematic Category
+SELECT 
+  category_tag,
+  COUNT(*) AS total
+FROM tickets
+GROUP BY category_tag
+ORDER BY total DESC;
+
+-- 18. Frequent Secondary Tags
+SELECT 
+  secondary_tag,
+  COUNT(*) AS frequency
+FROM tickets
+GROUP BY secondary_tag
+HAVING COUNT(*) > 50
+ORDER BY frequency DESC;
+
+-- 19. Peak Day Analysis
+SELECT 
+  DAYNAME(created_date) AS day,
+  COUNT(*) AS total
+FROM tickets
+GROUP BY day
+ORDER BY total DESC;
+
+-- 20. Monthly Growth Rate
+SELECT 
+  MONTH(created_date) AS month,
+  COUNT(*) AS tickets,
+  LAG(COUNT(*)) OVER (ORDER BY MONTH(created_date)) AS prev_month,
+  (COUNT(*) - LAG(COUNT(*)) OVER (ORDER BY MONTH(created_date))) AS growth
+FROM tickets
+GROUP BY month;
+
+-- 21. Slowest Tickets
+SELECT 
+  ticket_id,
+  DATEDIFF(resolved_date, created_date) AS resolution_days
+FROM tickets
+ORDER BY resolution_days DESC
+LIMIT 5;
+
+-- 22. Country-wise Resolution Performance
+SELECT 
+  country,
+  AVG(DATEDIFF(resolved_date, created_date)) AS avg_resolution
+FROM tickets
+GROUP BY country
+ORDER BY avg_resolution DESC;
+
+-- 23. Efficiency Score per Queue
+SELECT 
+  queue,
+  COUNT(*) AS total_tickets,
+  AVG(DATEDIFF(resolved_date, created_date)) AS avg_time,
+  ROUND(COUNT(*) / AVG(DATEDIFF(resolved_date, created_date)), 2) AS efficiency_score
+FROM tickets
+GROUP BY queue
+ORDER BY efficiency_score DESC;
+
+-- 24. High Priority Delay Rate
+SELECT 
+  COUNT(*) AS total_high,
+  SUM(CASE WHEN DATEDIFF(resolved_date, created_date) > 5 THEN 1 ELSE 0 END) AS delayed,
+  ROUND(SUM(CASE WHEN DATEDIFF(resolved_date, created_date) > 5 THEN 1 ELSE 0 END) * 100.0 / COUNT(*),2) AS delay_percentage
+FROM tickets
+WHERE priority = 'high';
+
+-- 25. Tag Impact on Resolution Time
+SELECT 
+  primary_tag,
+  AVG(DATEDIFF(resolved_date, created_date)) AS avg_time
+FROM tickets
+GROUP BY primary_tag
+ORDER BY avg_time DESC;
+
+-- 26. Workload vs Efficiency
+SELECT 
+  queue,
+  COUNT(*) AS workload,
+  AVG(DATEDIFF(resolved_date, created_date)) AS avg_time
+FROM tickets
+GROUP BY queue
+ORDER BY workload DESC;
